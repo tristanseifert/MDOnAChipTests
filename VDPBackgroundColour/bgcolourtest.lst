@@ -1,0 +1,53 @@
+00000000 00FF FF00                  		dc.l $FFFF00
+00000004 0000 0000                  		dc.l EntryPoint
+00000008                            		
+00000008                            EntryPoint:
+00000008 46FC 2700                  		move	#$2700, sr
+0000000C                            		
+0000000C                            ;		move.b	$A10001, d0	; get hardware version
+0000000C                            ;		andi.b	#$F,d0
+0000000C                            ;		beq.s	SkipSecurity
+0000000C                            ;		move.l	#'SEGA', $A14000
+0000000C                            ;
+0000000C                            ;SkipSecurity:
+0000000C                            
+0000000C                            MainProgramme: 	
+0000000C 41F9 00C0 0004             		lea		$C00004, a0							; Control port to a0.
+00000012 43FA 0000                  		lea		VDPRegSetupData(pc), a1				; Data to a1
+00000016 7000                       		moveq	#(((VDPRegSetupData_End-VDPRegSetupData)/2)-1), d0; Items to copy
+00000018                            		
+00000018                            @setUpVDP:
+00000018 3099                       		move.w	(a1)+, (a0)
+0000001A 51C8 FFFC                  		dbf		d0, @setUpVDP									; Loop until all registers have been set.
+0000001E                            		
+0000001E 7200                       		moveq	#0, d1											; Clear d1.
+00000020                            		
+00000020                            @infLoop:
+00000020 6100                       		bsr.s	@delayForALongTime								; Cause a ton of delay.
+00000022                            
+00000022 5441                       		add.w	#$2, d1											; Increase squelcher.
+00000024 20BC C000 0000             		move.l	#$C0000000, (a0)
+0000002A 3141 FFFC                  		move.w	d1, -4(a0)
+0000002E                            
+0000002E 60F0                       		bra.s	@infLoop
+00000030                            		
+00000030                            @delayForALongTime:
+00000030 203C 01FF FFFF             		move.l	#$1FFFFFF, d0
+00000036                            
+00000036                            @delayLoop:
+00000036 4E71                       		nop
+00000038 51C8 FFFC                  		dbf		d0, @delayLoop									; Keep looping.
+0000003C                            
+0000003C 4E75                       		rts
+0000003E                            		
+0000003E                            VDPRegSetupData:
+0000003E 8016                       		dc.w	$8016								; HInt on
+00000040 8134                       		dc.w	$8134								; Display on, DMA on, VBI on, 28 row, Genesis mode.
+00000042 8230                       		dc.w	$8230								; Plane A address
+00000044 8407                       		dc.w	$8407								; Plane B address
+00000046 8700                       		dc.w	$8700								; Backdrop is first colour in palette 0
+00000048 8C81                       		dc.w	$8C81								; No interlace, 40 tiles wide.
+0000004A 8F02                       		dc.w	$8F02								; Auto inc is 2
+0000004C 9001                       		dc.w	$9001								; Plane size is 64x32
+0000004E                            VDPRegSetupData_End: 
+0000004E                            		
