@@ -23,8 +23,9 @@ MainProgramme:
 		moveq	#0, d1											; Clear d1.
 		
 @infLoop:
-		bsr.s	@delayForALongTime								; Cause a ton of delay.
+		bra.s	@delayForALongTime								; Cause a ton of delay.
 
+@DelayReturn:
 		add.w	#$2, d1											; Increase squelcher.
 		move.l	#$C0000000, (a0)
 		move.w	d1, -4(a0)
@@ -38,7 +39,7 @@ MainProgramme:
 		nop
 		dbf		d0, @delayLoop									; Keep looping.
 
-		rts
+		bra.s	@DelayReturn									; Return.
 		
 VDPRegSetupData:
 		dc.w	$8016								; HInt on
